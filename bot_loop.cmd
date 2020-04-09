@@ -1,5 +1,6 @@
-@echo off
+rem @echo off
 :loop
-/.evn/Scripts/activate.bat
+
+\.env\Scripts\activate.bat
 python.exe bot.py 
-Goto loop
+goto loop
