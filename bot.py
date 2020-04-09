@@ -13,6 +13,7 @@ from datetime import time
 import config
 
 bot = telebot.TeleBot(config.token)
+telebot.apihelper.proxy = {'https':'socks5://127842015:53eB5eOL@orbtl.s5.opennetwork.cc:999'}
 
 @bot.message_handler(commands=['wc', 'пч'])
 @bot.message_handler(regexp="^.пч$")
