@@ -1,6 +1,7 @@
 *.pyc
 __pycache__
 .env
+.idea
 config.py
 out.jpg
 meteo.xml
