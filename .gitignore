@@ -2,6 +2,7 @@
 __pycache__
 .env
 .idea
+venv
 config.py
 out.jpg
 meteo.xml

@@ -13,7 +13,7 @@ from datetime import time
 import config
 
 bot = telebot.TeleBot(config.token)
-telebot.apihelper.proxy = {'https':'socks5://127842015:53eB5eOL@orbtl.s5.opennetwork.cc:999'}
+#telebot.apihelper.proxy = {'https':'socks5://127842015:53eB5eOL@orbtl.s5.opennetwork.cc:999'}
 
 @bot.message_handler(commands=['wc', 'пч'])
 @bot.message_handler(regexp="^.пч$")
@@ -207,7 +207,10 @@ def send_cucki(message):
  
      i = random.randint(0, len(links) - 1)
      url = "https://blog.stanis.ru/" + links[i]
-     bot.send_message(message.chat.id, url)
+     try:
+        bot.send_photo(message.chat.id, requests.get(url).content)
+     except:
+         bot.send_message(message.chat.id, "какая то хуйня, не пашет")
    else:
     tz = 'Europe/Moscow'
     fmt = '%Y-%m-%d %H:%M:%S'
@@ -222,7 +225,10 @@ def send_cucki(message):
 
       i = random.randint(0, len(links) - 1)
       url = "https://blog.stanis.ru/" + links[i]
-      bot.send_message(message.chat.id, url)
+      try:
+          bot.send_photo(message.chat.id, requests.get(url).content)
+      except:
+          bot.send_message(message.chat.id, "какая то хуйня, не пашет")
     else:
       print (time_str+'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват. @OPCKBot ')
       bot.send_message(message.chat.id, 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват @OPCKBot')
