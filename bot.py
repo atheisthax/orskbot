@@ -21,6 +21,10 @@ if cfg.getboolean("proxy", "useproxy"):
     telebot.apihelper.proxy = {proxytype: proxy}
 bot = telebot.TeleBot(config.token)
 
+f = open('./etc/cucbka.dat')
+links = f.read().split('\n')
+f.close()
+
 
 @bot.message_handler(commands=['wc', 'пч'])
 @bot.message_handler(regexp="^.пч$")
@@ -244,10 +248,6 @@ def send_ku_town(message):
 @bot.message_handler(regexp="^(сиськи|\.сиськи)$")
 def send_cucki(message):
     if message.chat.id != -242669552:
-        f = open('cucbka.dat')
-        links = f.read().split('\n')
-        f.close()
-
         i = random.randint(0, len(links) - 1)
         url = "https://blog.stanis.ru/imgs/" + links[i]
         try:
@@ -262,10 +262,6 @@ def send_cucki(message):
         time_str = timezone(tz).fromutc(utc).strftime(fmt)
         now_time = now.time()
         if now_time <= time(7, 00) or now_time >= time(18, 30):
-            f = open('cucbka.dat')
-            links = f.read().split('\n')
-            f.close()
-
             i = random.randint(0, len(links) - 1)
             url = "https://blog.stanis.ru/imgs/" + links[i]
             try:
@@ -275,5 +271,6 @@ def send_cucki(message):
         else:
             print(time_str + 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват. @OPCKBot ')
             bot.send_message(message.chat.id, 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват @OPCKBot')
+
 
 bot.polling(none_stop=True)
