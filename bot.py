@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import re
-import pytz
-import random
 import datetime
-import telebot
-import requests
-import xmltodict
-from pytz import timezone
+import random
+import re
 from datetime import time
 
 import config
+import pytz
+import requests
+import telebot
+import xmltodict
+import configparser
+from pytz import timezone
 
+cfg = configparser.ConfigParser()
+cfg.read("./bot.ini", encoding='utf8')
+if cfg.getboolean("proxy", "useproxy"):
+    proxytype = cfg.get("proxy", "proxytype")
+    proxy = cfg.get("proxy", "proxy")
+    telebot.apihelper.proxy = {proxytype: proxy}
 bot = telebot.TeleBot(config.token)
-#telebot.apihelper.proxy = {'https':'socks5://127842015:53eB5eOL@orbtl.s5.opennetwork.cc:999'}
+
 
 @bot.message_handler(commands=['wc', 'пч'])
 @bot.message_handler(regexp="^.пч$")
 @bot.message_handler(regexp="^.ч$")
 @bot.message_handler(regexp="^.чп$")
 def send_weather(message):
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=1508291&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
+    r = requests.get(
+        'http://api.openweathermap.org/data/2.5/weather?id=1508291&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
         temperature = doc['current']['temperature']['@value']
@@ -33,26 +41,26 @@ def send_weather(message):
     now = timezone(tz).fromutc(utc)
     time_str = timezone(tz).fromutc(utc).strftime(fmt)
     now_time = now.time()
-    if now_time <= time(22,00) and now_time >= time(11,00):
+    if now_time <= time(22, 00) and now_time >= time(11, 00):
         station = '9900854'
     else:
         station = '9900846'
 
     user_agent = {'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'}
     s = requests.Session()
-    r = s.get('https://yandex.ru/maps/api/masstransit/getStopInfo', headers = user_agent)
+    r = s.get('https://yandex.ru/maps/api/masstransit/getStopInfo', headers=user_agent)
     r_dict = r.json()
     token = r_dict.get('csrfToken')
 
     url = 'https://yandex.ru/maps/api/masstransit/getStopInfo?csrfToken=' + token + '&host_config[hostname]=yandex.ru&id=stop__' + station + '&locale=ru_RU&mode=prognosis'
-    r = s.get(url, headers = user_agent)
+    r = s.get(url, headers=user_agent)
     r_dict = r.json()
 
     try:
         station_name = r_dict['data']['properties']['name']
         current_time = r_dict['data']['properties']['currentTime']
     except KeyError:
-        bot.send_message(message.chat.id, 'За бортом: ', temperature) 
+        bot.send_message(message.chat.id, 'За бортом: ', temperature)
         bot.send_message(message.chat.id, 'C пепелацем произошла какая-то хуйня...')
         return
 
@@ -81,7 +89,8 @@ def send_weather(message):
                         minutes, seconds = divmod(remainder, 60)
                         if minutes > 30: continue
                         count += 1
-                        message_list.append('Пепелац №22 прибывает через: ' + str(minutes) + ' мин. ' + str(seconds) + ' сек. на ' + str(count) + ' путь')
+                        message_list.append('Пепелац №22 прибывает через: ' + str(minutes) + ' мин. ' + str(
+                            seconds) + ' сек. на ' + str(count) + ' путь')
                 if count == 0: message_list.append('Пепелац №22 пока не прибывает, ждите')
     except KeyError:
         bot.send_message(message.chat.id, 'За бортом: ', temperature)
@@ -92,9 +101,10 @@ def send_weather(message):
         msg += item + '\n'
     bot.send_message(message.chat.id, msg)
 
+
 @bot.message_handler(commands=['w', 'п'])
 @bot.message_handler(regexp="^.п$")
-#@bot.message_handler(regexp="^п$")
+# @bot.message_handler(regexp="^п$")
 def send_weather(message):
     r = requests.get('http://pc.ornpz.ru/meteo/temperature1day.png')
     if r.status_code == 200:
@@ -107,69 +117,83 @@ def send_weather(message):
         bot.send_photo(message.chat.id, img)
         img.close()
     else:
-        bot.send_message(message.chat.id, "Произошла какая-то хуйня (URL: http://pc.ornpz.ru/meteo/temperature1day.png)...") 
+        bot.send_message(message.chat.id,
+                         "Произошла какая-то хуйня (URL: http://pc.ornpz.ru/meteo/temperature1day.png)...")
 
-    # get temperature
+        # get temperature
     r = requests.get('http://pc.ornpz.ru/meteo/meteo.xml')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
-            
+
         for section in doc['points']['point']:
             key = section.get('@name', None)
             # направление ветра
-            #if key == 'PointName01':
+            # if key == 'PointName01':
             #    value = section.get('@value', None)
             #    print 'P:'+value
 
             # температура
-            if key == 'PointName05':       
+            if key == 'PointName05':
                 value = section.get('@value', None)
                 print('T:' + value)
-                bot.send_message(message.chat.id,'T: ' + value)
+                bot.send_message(message.chat.id, 'T: ' + value)
     else:
-        bot.send_message(message.chat.id, u"cannot get content of ( URL: http://pc.ornpz.ru/meteo/meteo.xml)... ERROR:" + str(r.status))
+        bot.send_message(message.chat.id,
+                         u"cannot get content of ( URL: http://pc.ornpz.ru/meteo/meteo.xml)... ERROR:" + str(r.status))
+
 
 @bot.message_handler(commands=['wm', 'пм'])
 @bot.message_handler(regexp="^.пм$")
-#@bot.message_handler(regexp="^пм$")
+# @bot.message_handler(regexp="^пм$")
 def send_weather(message):
     # get temperature MSK
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
+    r = requests.get(
+        'http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
         value = doc['current']['temperature']['@value']
         print('MSK T:' + value)
-        bot.send_message(message.chat.id,'MSK T: ' + value)
+        bot.send_message(message.chat.id, 'MSK T: ' + value)
     else:
-        bot.send_message(message.chat.id, u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(r.status))
+        bot.send_message(message.chat.id,
+                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
+                             r.status))
+
 
 @bot.message_handler(commands=['wy', 'пя'])
 @bot.message_handler(regexp="^.пя$")
 @bot.message_handler(regexp="^пя$")
 def send_weather(message):
-    # get temperature Yaroslavl
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
+    # get temperature MSK
+    r = requests.get(
+        'http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
         value = doc['current']['temperature']['@value']
         print('YAR T:' + value)
-        bot.send_message(message.chat.id,'YAR T: ' + value)
+        bot.send_message(message.chat.id, 'YAR T: ' + value)
     else:
-        bot.send_message(message.chat.id, u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(r.status))
+        bot.send_message(message.chat.id,
+                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
+                             r.status))
+
 
 @bot.message_handler(commands=['wh', 'пр'])
 @bot.message_handler(regexp="^.пр$")
 @bot.message_handler(regexp="^пр$")
 def send_weather(message):
     # get temperature Riga
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
+    r = requests.get(
+        'http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
         value = doc['current']['temperature']['@value']
         print('YAR T:' + value)
-        bot.send_message(message.chat.id,'RIGA T: ' + value)
+        bot.send_message(message.chat.id, 'RIGA T: ' + value)
     else:
-        bot.send_message(message.chat.id, u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(r.status))
+        bot.send_message(message.chat.id,
+                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
+                             r.status))
 
 
 @bot.message_handler(commands=['wp', 'пп'])
@@ -177,14 +201,18 @@ def send_weather(message):
 @bot.message_handler(regexp="^пп$")
 def send_weather(message):
     # get temperature MSK
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
+    r = requests.get(
+        'http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
         value = doc['current']['temperature']['@value']
         print('SPB T:' + value)
-        bot.send_message(message.chat.id,'SPB T: ' + value)
+        bot.send_message(message.chat.id, 'SPB T: ' + value)
     else:
-        bot.send_message(message.chat.id, u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(r.status))
+        bot.send_message(message.chat.id,
+                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
+                             r.status))
+
 
 @bot.message_handler(commands=['ku', 'ку'])
 @bot.message_handler(regexp="^(ку|\.ку|ku|\.ku|re|\.re)$")
@@ -211,40 +239,41 @@ def send_ku_town(message):
     time_str = timezone(tz).fromutc(utc).strftime(fmt)
     bot.send_message(message.chat.id, time_str)
 
+
 @bot.message_handler(commands=['сиськи'])
 @bot.message_handler(regexp="^(сиськи|\.сиськи)$")
 def send_cucki(message):
-   if message.chat.id != -242669552:
-     f = open('cucbka.dat')
-     links = f.read().split('\n')
-     f.close()
- 
-     i = random.randint(0, len(links) - 1)
-     url = "https://blog.stanis.ru/" + links[i]
-     try:
-        bot.send_photo(message.chat.id, requests.get(url).content)
-     except:
-         bot.send_message(message.chat.id, "какая то хуйня, не пашет")
-   else:
-    tz = 'Europe/Moscow'
-    fmt = '%Y-%m-%d %H:%M:%S'
-    utc = datetime.datetime.utcnow()
-    now = timezone(tz).fromutc(utc)
-    time_str = timezone(tz).fromutc(utc).strftime(fmt)
-    now_time = now.time()
-    if now_time <= time(7,00) or now_time >= time(18,30):
-      f = open('cucbka.dat')
-      links = f.read().split('\n')
-      f.close() 
+    if message.chat.id != -242669552:
+        f = open('cucbka.dat')
+        links = f.read().split('\n')
+        f.close()
 
-      i = random.randint(0, len(links) - 1)
-      url = "https://blog.stanis.ru/" + links[i]
-      try:
-          bot.send_photo(message.chat.id, requests.get(url).content)
-      except:
-          bot.send_message(message.chat.id, "какая то хуйня, не пашет")
+        i = random.randint(0, len(links) - 1)
+        url = "https://blog.stanis.ru/imgs/" + links[i]
+        try:
+            bot.send_photo(message.chat.id, requests.get(url).content)
+        except:
+            bot.send_message(message.chat.id, "какая то хуйня, не пашет")
     else:
-      print (time_str+'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват. @OPCKBot ')
-      bot.send_message(message.chat.id, 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват @OPCKBot')
+        tz = 'Europe/Moscow'
+        fmt = '%Y-%m-%d %H:%M:%S'
+        utc = datetime.datetime.utcnow()
+        now = timezone(tz).fromutc(utc)
+        time_str = timezone(tz).fromutc(utc).strftime(fmt)
+        now_time = now.time()
+        if now_time <= time(7, 00) or now_time >= time(18, 30):
+            f = open('cucbka.dat')
+            links = f.read().split('\n')
+            f.close()
+
+            i = random.randint(0, len(links) - 1)
+            url = "https://blog.stanis.ru/imgs/" + links[i]
+            try:
+                bot.send_photo(message.chat.id, requests.get(url).content)
+            except:
+                bot.send_message(message.chat.id, "какая то хуйня, не пашет")
+        else:
+            print(time_str + 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват. @OPCKBot ')
+            bot.send_message(message.chat.id, 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват @OPCKBot')
 
 bot.polling(none_stop=True)
