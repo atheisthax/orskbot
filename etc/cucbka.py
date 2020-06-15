@@ -9,8 +9,8 @@ import time
 import requests
 from lxml import html, etree
 
-MIN_PAGE = 731
-MAX_PAGE = 821
+MIN_PAGE = 600
+MAX_PAGE = 875
 
 f = open('cucbka.dat', 'a')
 for page in range(MIN_PAGE, MAX_PAGE + 1):
@@ -23,6 +23,6 @@ for page in range(MIN_PAGE, MAX_PAGE + 1):
         f.write("\n".join(links))
     if page != MAX_PAGE:
         f.write("\n")
-        time.sleep(2)
+        time.sleep(1)
 
 f.close()
