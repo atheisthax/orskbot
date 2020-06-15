@@ -4,8 +4,6 @@
  Scripts parse links for cuckI pictures =) 
  and write to file cucbka.dat
 """
-import time
-from io import StringIO
 import requests
 from lxml import html, etree
 
