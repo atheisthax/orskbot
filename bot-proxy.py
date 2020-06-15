@@ -13,7 +13,7 @@ from datetime import time
 import config
 
 bot = telebot.TeleBot(config.token)
-#telebot.apihelper.proxy = {'https':'socks5://127842015:53eB5eOL@orbtl.s5.opennetwork.cc:999'}
+telebot.apihelper.proxy = {'https':'socks5://192.168.254.10:9050'}
 
 @bot.message_handler(commands=['wc', 'пч'])
 @bot.message_handler(regexp="^.пч$")
@@ -147,7 +147,7 @@ def send_weather(message):
 @bot.message_handler(regexp="^.пя$")
 @bot.message_handler(regexp="^пя$")
 def send_weather(message):
-    # get temperature Yaroslavl
+    # get temperature MSK
     r = requests.get('http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
     if r.status_code == 200:
         doc = xmltodict.parse(r.text)
@@ -156,6 +156,7 @@ def send_weather(message):
         bot.send_message(message.chat.id,'YAR T: ' + value)
     else:
         bot.send_message(message.chat.id, u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(r.status))
+
 
 @bot.message_handler(commands=['wh', 'пр'])
 @bot.message_handler(regexp="^.пр$")
@@ -220,7 +221,7 @@ def send_cucki(message):
      f.close()
  
      i = random.randint(0, len(links) - 1)
-     url = "https://blog.stanis.ru/" + links[i]
+     url = "https://blog.stanis.ru/imgs/" + links[i]
      try:
         bot.send_photo(message.chat.id, requests.get(url).content)
      except:
@@ -238,7 +239,7 @@ def send_cucki(message):
       f.close() 
 
       i = random.randint(0, len(links) - 1)
-      url = "https://blog.stanis.ru/" + links[i]
+      url = "https://blog.stanis.ru/imgs/" + links[i]
       try:
           bot.send_photo(message.chat.id, requests.get(url).content)
       except:

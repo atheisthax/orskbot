@@ -1,0 +1,1 @@
+powershell -executionpolicy unrestricted e:\!sys\orskbot\bot_ps.ps1

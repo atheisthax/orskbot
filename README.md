@@ -34,6 +34,10 @@ Windows
 ```sh
 bot_loop.cmd
 ```
+or powershell (cmd script won't work fine for me}
+```sh
+powershell -executionpolicy unrestricted e:\!sys\orskbot\bot_ps.ps1
+```
 
 Linux and OS X
 ```sh
