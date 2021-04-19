@@ -19,7 +19,7 @@ if r.status_code == 200:
 MIN_PAGE = 1
 MAX_PAGE = int(tmp1)
 print("Max page for processing: " + str(MAX_PAGE))
-f = open('./cucbka.dat', 'a')
+f = open('./cucbka1.dat', 'a')
 tmp = list()
 for page in range(MIN_PAGE, MAX_PAGE):
     print("Proccess page: " + str(page))
