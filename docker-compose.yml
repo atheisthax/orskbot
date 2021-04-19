@@ -1,0 +1,11 @@
+version: "3"
+services:
+  orskbot:
+    build: .
+    image: orskbot:190421
+    container_name: orskbot
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ~/orskbot-docker/bot.ini:/opt/orskbot/bot.ini
+      - ~/orskbot-docker/config.py:/opt/orskbot/config.py
