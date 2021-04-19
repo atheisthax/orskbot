@@ -7,5 +7,5 @@ services:
     restart: always
     network_mode: "host"
     volumes:
-      - ~/orskbot-docker/bot.ini:/opt/orskbot/bot.ini
-      - ~/orskbot-docker/config.py:/opt/orskbot/config.py
+      - ./bot.ini:/opt/orskbot/bot.ini
+      - ./config.py:/opt/orskbot/config.py
