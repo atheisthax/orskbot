@@ -2,10 +2,9 @@ version: "3"
 services:
   orskbot:
     build: .
-    image: orskbot:190421
+    image: orskbot:200421
     container_name: orskbot
     restart: always
     network_mode: "host"
     volumes:
-      - ./bot.ini:/opt/orskbot/bot.ini
-      - ./config.py:/opt/orskbot/config.py
+     - ./config.py:/opt/orskbot/config.py
