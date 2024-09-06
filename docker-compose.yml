@@ -2,7 +2,7 @@ version: "3"
 services:
   orskbot:
     build: .
-    image: orskbot:241122
+    image: orskbot:010924
     container_name: orskbot
     restart: always
     network_mode: "host"

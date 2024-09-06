@@ -147,9 +147,10 @@ def send_cucki(message):
             i = random.randint(0, len(links) - 1)
             url = "https://blog.stanis.ru/imgs/" + links[i]
             try:
-                bot.send_photo(message.chat.id, requests.get(url).content)
+                bot.send_photo(message.chat.id, requests.get(url).content, has_spoiler=True)
                 error = False
             except:
+                bot.send_message(message.chat.id, "Произошла какая то хуйня")
                 error = True
     else:
         tz = 'Europe/Moscow'
@@ -163,9 +164,10 @@ def send_cucki(message):
                 i = random.randint(0, len(links) - 1)
                 url = "https://blog.stanis.ru/imgs/" + links[i]
                 try:
-                    bot.send_photo(message.chat.id, requests.get(url).content)
+                    bot.send_photo(message.chat.id, requests.get(url).content, has_spoiler=True)
                     error = False
                 except:
+                    bot.send_message(message.chat.id, "Произошла какая то хуйня")
                     error = True
         else:
             print(time_str + 'с 7:00 по 18:30 MSK сиськи не показываю. Пишите в приват. @OPCKBot ')
