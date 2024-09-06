@@ -12,6 +12,65 @@ import telebot
 import xmltodict
 from pytz import timezone
 
+import requests
+from bs4 import BeautifulSoup
+
+def getmeteo(city):
+    if city =='orsk':
+        myUrl = "https://rp5.ru/Погода_в_Орске,_Оренбургская_область"
+    elif city == 'msk':
+        myUrl = "https://rp5.ru/Погода_в_Москве_(центр,_Балчуг)"
+    elif city == 'spb':
+        myUrl = "https://rp5.ru/Погода_в_Санкт-Петербурге"
+    elif city == 'yar':
+        myUrl = "https://rp5.ru/Погода_в_Ярославле,_Ярославская_область"
+    elif city == 'riga':
+        myUrl = "https://rp5.ru/Погода_в_Риге,_Латвия"
+    else:
+        print("not correct city")
+        output = ["", ""]
+        return output
+    #
+    # Используем более распространенный User-Agent
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+
+    try:
+        response = requests.get(myUrl, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+
+        # Парсим HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Находим <div> с id 'ArchTemp'
+        arch_temp_div = soup.find('div', id='ArchTemp')
+        if arch_temp_div:
+            # Находим <span> с классом 't_0' для температуры в Цельсиях
+            temp_celsius = arch_temp_div.find('span', class_='t_0')
+            if temp_celsius:
+                outtemp = temp_celsius.text.strip()
+                #print(f"Температура: {temp_celsius.text.strip()}")  # Печатаем температуру
+            else:
+                print("Не удалось найти температуру в Цельсиях.")
+        else:
+            print("Не удалось найти элемент с id='ArchTemp'.")
+
+        meta_description = soup.find('meta', attrs={'name': 'description'})
+        if meta_description and 'content' in meta_description.attrs:
+            # Извлекаем содержимое атрибута content
+            description_content = meta_description['content']
+            outmetar = description_content
+            #print(description_content)
+        else:
+            print("Тег <meta name='description'> не найден.")
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка: {e}")
+    output = [outtemp,outmetar,myUrl]
+    return output
+
+
+
 try:
     if config.useproxy:
         telebot.apihelper.proxy = {config.proxytype: config.proxy}
@@ -28,89 +87,65 @@ f.close()
 # @bot.message_handler(regexp="^пм$")
 def send_weather(message):
     # get temperature ORSK
-    r = requests.get(
-        'http://api.openweathermap.org/data/2.5/weather?id=514734&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
-    if r.status_code == 200:
-        doc = xmltodict.parse(r.text)
-        value = doc['current']['temperature']['@value']
-        print('ORSK T:' + value)
-        bot.send_message(message.chat.id, 'ORSK T: ' + value)
+    meteo = getmeteo("orsk")
+    if meteo[0] != "":
+        text = '<b>ORSK T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
+        print(text)
+        bot.send_message(message.chat.id, text, parse_mode='HTML')
     else:
-        bot.send_message(message.chat.id,
-                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=514734&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
-                             r.status))
+        bot.send_message(message.chat.id,"не получилось получить погоду")
 
 @bot.message_handler(commands=['wm', 'пм'])
 @bot.message_handler(regexp="^.пм$")
 # @bot.message_handler(regexp="^пм$")
 def send_weather(message):
     # get temperature MSK
-    r = requests.get(
-        'http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
-    if r.status_code == 200:
-        doc = xmltodict.parse(r.text)
-        value = doc['current']['temperature']['@value']
-        print('MSK T:' + value)
-        bot.send_message(message.chat.id, 'MSK T: ' + value)
+    meteo = getmeteo("msk")
+    if meteo[0] != "":
+        text = '<b>MSK T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
+        print(text)
+        bot.send_message(message.chat.id, text, parse_mode='HTML')
     else:
-        bot.send_message(message.chat.id,
-                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=524901&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
-                             r.status))
-
+        bot.send_message(message.chat.id,"не получилось получить погоду")
 
 @bot.message_handler(commands=['wy', 'пя'])
 @bot.message_handler(regexp="^.пя$")
 @bot.message_handler(regexp="^пя$")
 def send_weather(message):
-    # get temperature MSK
-    r = requests.get(
-        'http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
-    if r.status_code == 200:
-        doc = xmltodict.parse(r.text)
-        value = doc['current']['temperature']['@value']
-        print('YAR T:' + value)
-        bot.send_message(message.chat.id, 'YAR T: ' + value)
+    # get temperature YAR
+    meteo = getmeteo("yar")
+    if meteo[0] != "":
+        text = '<b>YAR T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
+        print(text)
+        bot.send_message(message.chat.id, text, parse_mode='HTML')
     else:
-        bot.send_message(message.chat.id,
-                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=468902&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
-                             r.status))
-
+        bot.send_message(message.chat.id,"не получилось получить погоду")
 
 @bot.message_handler(commands=['wh', 'пр'])
 @bot.message_handler(regexp="^.пр$")
 @bot.message_handler(regexp="^пр$")
 def send_weather(message):
     # get temperature Riga
-    r = requests.get(
-        'http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
-    if r.status_code == 200:
-        doc = xmltodict.parse(r.text)
-        value = doc['current']['temperature']['@value']
-        print('YAR T:' + value)
-        bot.send_message(message.chat.id, 'RIGA T: ' + value)
+    meteo = getmeteo("riga")
+    if meteo[0] != "":
+        text = '<b>RIGA T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
+        print(text)
+        bot.send_message(message.chat.id, text, parse_mode='HTML')
     else:
-        bot.send_message(message.chat.id,
-                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=456173&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
-                             r.status))
-
+        bot.send_message(message.chat.id,"не получилось получить погоду")
 
 @bot.message_handler(commands=['wp', 'пп'])
 @bot.message_handler(regexp="^.пп$")
 @bot.message_handler(regexp="^пп$")
 def send_weather(message):
-    # get temperature MSK
-    r = requests.get(
-        'http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8')
-    if r.status_code == 200:
-        doc = xmltodict.parse(r.text)
-        value = doc['current']['temperature']['@value']
-        print('SPB T:' + value)
-        bot.send_message(message.chat.id, 'SPB T: ' + value)
+    # get temperature SPB
+    meteo = getmeteo("spb")
+    if meteo[0] != "":
+        text = '<b>SPB T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
+        print(text)
+        bot.send_message(message.chat.id, text, parse_mode='HTML')
     else:
-        bot.send_message(message.chat.id,
-                         u"cannot get content of ( URL: http://api.openweathermap.org/data/2.5/weather?id=498817&units=metric&mode=xml&appid=7cad4e5a16fc989137d9dcaa7d726ff8)... ERROR:" + str(
-                             r.status))
-
+        bot.send_message(message.chat.id,"не получилось получить погоду")
 
 @bot.message_handler(commands=['ku', 'ку'])
 @bot.message_handler(regexp="^(ку|\.ку|ku|\.ku|re|\.re)$")
