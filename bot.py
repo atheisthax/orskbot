@@ -91,7 +91,7 @@ def send_weather(message):
     if meteo[0] != "":
         text = '<b>ORSK T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
         print(text)
-        bot.send_message(message.chat.id, text, parse_mode='HTML')
+        bot.send_message(message.chat.id, text, parse_mode='HTML',disable_web_page_preview=True)
     else:
         bot.send_message(message.chat.id,"не получилось получить погоду")
 
@@ -104,7 +104,7 @@ def send_weather(message):
     if meteo[0] != "":
         text = '<b>MSK T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
         print(text)
-        bot.send_message(message.chat.id, text, parse_mode='HTML')
+        bot.send_message(message.chat.id, text, parse_mode='HTML',disable_web_page_preview=True)
     else:
         bot.send_message(message.chat.id,"не получилось получить погоду")
 
@@ -117,7 +117,7 @@ def send_weather(message):
     if meteo[0] != "":
         text = '<b>YAR T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
         print(text)
-        bot.send_message(message.chat.id, text, parse_mode='HTML')
+        bot.send_message(message.chat.id, text, parse_mode='HTML',disable_web_page_preview=True)
     else:
         bot.send_message(message.chat.id,"не получилось получить погоду")
 
@@ -130,7 +130,7 @@ def send_weather(message):
     if meteo[0] != "":
         text = '<b>RIGA T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
         print(text)
-        bot.send_message(message.chat.id, text, parse_mode='HTML')
+        bot.send_message(message.chat.id, text, parse_mode='HTML',disable_web_page_preview=True)
     else:
         bot.send_message(message.chat.id,"не получилось получить погоду")
 
@@ -143,7 +143,7 @@ def send_weather(message):
     if meteo[0] != "":
         text = '<b>SPB T:' + meteo[0] + '</b>\n' + meteo[1] + '\n' + meteo[2]
         print(text)
-        bot.send_message(message.chat.id, text, parse_mode='HTML')
+        bot.send_message(message.chat.id, text, parse_mode='HTML',disable_web_page_preview=True)
     else:
         bot.send_message(message.chat.id,"не получилось получить погоду")
 
